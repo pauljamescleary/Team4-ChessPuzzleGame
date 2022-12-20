@@ -1,0 +1,37 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  api:
+    build: backend
+    container_name: chess_api
+    depends_on:
+      - db
+    ports:
+      - 5000:5000
+    environment:
+      - FLASK_SQLALCHEMY_DATABASE_URI=postgresql://test:test@chess_db:5432/test
+      - FLASK_SECRET_KEY=changeme
+
+  db:
+    image: postgres
+    container_name: chess_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+
+  pgadmin:
+    container_name: chess_admin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: example
+    ports:
+      - "8080:80"
+      

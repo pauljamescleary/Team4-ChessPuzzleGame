@@ -1,0 +1,45 @@
+name: Docker Image CI
+
+on:
+  push:
+    tags: [ "v*.*.*" ]
+
+jobs:
+
+  build:
+
+    #spinning up an ubuntu machine
+    runs-on: ubuntu-latest
+    # need access to github container registry
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+    # checkout tagged version of vode
+    - uses: actions/checkout@v3
+      with:
+        ref: "${{ github.ref_name }}"
+      
+    - name: Login to Github GHCR
+      uses: docker/login-action@v1
+      with: 
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    # automatically tag docker container
+    - name: extract metadata
+      uses: docker/metadata-action@v4
+      id: meta
+      with:
+        images: ghcr.io/h3its/chess
+
+    - name: Build and Publish
+      uses: docker/build-push-action@v3
+      with:
+        context: backend
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+  
